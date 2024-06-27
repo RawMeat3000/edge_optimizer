@@ -258,7 +258,7 @@ class UI(EdgeOptimizer):
         
         pm.menuBarLayout()
         pm.menu( label='Help' )
-        pm.menuItem( label='There is no help!' )
+        pm.menuItem( label='Get help!', command=lambda *args:self.helpWindow() )
         #pm.menuItem( label='Polycount Thread' )
         #pm.menuItem( label='Creative Crash' )
         #pm.menuItem( label='My Website' )
@@ -266,29 +266,27 @@ class UI(EdgeOptimizer):
         # Padding to make things look nicer
         pm.frameLayout(labelVisible=False, marginHeight=10, marginWidth=10)
         
-        pm.text(l="Instructions:\r\nThis tool I made in 2015 at work, then recreated at home from scratch. \r\nIt is meant to remove superfluous edges from a model which\
-                \r\ndo not add detail and can safely be optimized away without affecting the visual look.\r\n")
-        
         pm.frameLayout(label="", marginHeight=5, marginWidth=5)
 
         pm.columnLayout(rowSpacing=10, adjustableColumn=True)
         self.angleToleranceSlider = pm.floatSliderGrp(l="Angle Tolerance", field=True, value=0.001, minValue=0, maxValue=0.1, step=0.001, 
                                                     adjustableColumn=3, columnWidth=([2,0], [3,150]), columnAttach3=["right","left","right"], 
                                                     columnOffset3=[40,-40,0], annotation="You'll probably never need to adjust this.")
-        self.mergeDistSlider = pm.floatSliderGrp(l="Vert Merge Distance", field=True, value=0.05, 
-                                               columnWidth=([2,0], [3,150]), adjustableColumn=3, columnAttach3=["right","left","right"], 
-                                               columnOffset3=[40,-40,0], annotation="Info text")
-        #pm.intSliderGrp(l="Some other option", field=True, value=0)
         
         pm.rowLayout(numberOfColumns=2)
         self.searchTypeDropdown = pm.optionMenuGrp(label='Search Type', columnAlign=[1,"left"], columnAttach=[2,"left", -80] )
         pm.menuItem(label='Entire Mesh')
         pm.menuItem(label='Boolean History')
         pm.menuItem(label='By Material')
-        self.mergeVertsCheckbox = pm.checkBoxGrp(label="Merge verts afterward", columnAlign=[1,"left"], columnAttach=[2,"left", -10])
+        self.mergeVertsCheckbox = pm.checkBoxGrp(label="Merge verts afterward", columnAlign=[1,"left"], columnAttach=[2,"left", -10], changeCommand=lambda *args:self.toggleVertMergeSlider())
         pm.setParent('..')
+        self.mergeDistSlider = pm.floatSliderGrp(l="Vert Merge Dist", field=True, value=0.05, 
+                                        columnWidth=([2,0], [3,150]), adjustableColumn=3, columnAttach3=["right","left","right"], 
+                                        columnOffset3=[40,-40,0], annotation="Info text", visible=False)
         
-        pm.button(l="Clean it!", h=40, c=lambda *args:self.buttonPress(), bgc=[0.6,0.6,0.6])
+        pm.setParent('..')
+
+        pm.button(l="Clean it!", h=40, c=lambda *args:self.buttonPress(), bgc=[0.6,0.8,0.6])
         
         pm.showWindow(windowName)
         
@@ -301,7 +299,23 @@ class UI(EdgeOptimizer):
         
         self.deleteBooleanEdges(searchType, angleTolerance, mergeVerts, mergeDistance)
 
+
+    def helpWindow(self):
+        windowName = "HelpWindow"
+        if pm.window(windowName, exists=True):
+            pm.deleteUI(windowName)
+        
+        pm.window(windowName, t=windowName)
+        pm.columnLayout(rowSpacing=10, adjustableColumn=True)
+        pm.text(l="This tool I made in 2015 at work, then recreated at home from scratch. \r\nIt is meant to remove superfluous edges from a model which\
+        \r\ndo not add detail and can safely be optimized away without affecting the visual look.\r\n")
+        pm.showWindow(windowName)
 		
+
+    def toggleVertMergeSlider(self):
+        visibleState = pm.floatSliderGrp(self.mergeDistSlider, query=True, visible=True)
+        pm.floatSliderGrp(self.mergeDistSlider, edit=True, visible=not visibleState)
+
     def dropDownMenu(self):
         pass
     
