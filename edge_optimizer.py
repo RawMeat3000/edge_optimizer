@@ -17,9 +17,9 @@ import maya.api.OpenMaya as om2
 import pymel.core as pm
 
 
-class BooleanCleaner(object):
+class EdgeOptimizer(object):
     mayaVersion = pm.about(version = True)
-    
+
 	
     def removeFromArray(dagPath, components, deleteMe):
         """
@@ -47,7 +47,7 @@ class BooleanCleaner(object):
         vertIndicies = []
         vertPositions = []
         
-        for vert in xrange(mesh.numVertices - 1):
+        for vert in range(mesh.numVertices - 1):
             vertIndicies.append(vert)
             vertPos = mesh.getPoint(vert)
             vertPositions.append((vertPos.x, vertPos.y, vertPos.z))
@@ -59,7 +59,11 @@ class BooleanCleaner(object):
         # Get input nodes on object to find new edges created by booleans
         obj = pm.ls(dagPath)[0]
         
-        if mode == "Maya Default":
+        if mode == "Entire Mesh":
+            print("Iterating over whole mesh")
+            boolVerts = range(0, obj.numVertices()-1)
+
+        elif mode == "Boolean History":
             boolNodes = []
             
             # Iterate trough input nodes and find all booleans
@@ -69,7 +73,7 @@ class BooleanCleaner(object):
                     # Move the cut mesh up 1000 units to be safe
                     # This temporarily removes the boolean effects
                     # Pretty hacky, but it works
-                    print node
+                    print(node)
                     pm.xform(node, t=[0,1000,0])
                     
                     boolNodes.append(node)
@@ -90,8 +94,8 @@ class BooleanCleaner(object):
             for i, vert in enumerate(diffedVerts):
                 boolVerts.append(postVertIndicies[i])
 
-        if mode == "By Material":
-            print "Searching by material"
+        elif mode == "By Material":
+            print("Searching by material")
             material = raw_input("Enter material name")
 			
             # Select faces by material. Get edges, then get verts
@@ -101,11 +105,7 @@ class BooleanCleaner(object):
             for i, vert in enumerate(boolVerts[:]):
                 boolVerts[i] = vert.index()
             
-        if mode == "Entire Mesh":
-            print "Iterating over whole mesh"
-            boolVerts = xrange(0, obj.numVertices()-1)
-            
-        print "Bool verts:", boolVerts
+        print("Bool verts:", boolVerts)
         
         if boolVerts:
             return boolVerts
@@ -130,7 +130,7 @@ class BooleanCleaner(object):
                     # we need to check to see if it's safe
                     if outlyingEdges > 4:
                         sharedEdges = list(set(outlyingEdges).intersection(connectedEdges))
-                        print sharedEdges
+                        print(sharedEdges)
                         if sharedEdges:
                             for i, edge in enumerate(sharedEdges):
                                 if edge in connectedEdges:
@@ -140,17 +140,16 @@ class BooleanCleaner(object):
                 conVertIter.next()
 				
             else:
-                print "ran out of verts"
+                print("ran out of verts")
                 break
             
         return connectedEdges
 
 		
     def checkUVBorders(self, edges):
-        print "Checking if edge is a UV border"
+        print("Checking if edges are part of a UV border")
         safeEdges = []
         for edge in edges:
-            print edge
             numUVs = pm.ls( pm.polyListComponentConversion( edge, fromEdge=True, toUV=True ), fl=True)
             if len(numUVs) < 3:
                 safeEdges.append(edge)
@@ -162,12 +161,12 @@ class BooleanCleaner(object):
         mesh = om2.MFnMesh(dagPath)
         
         # Maya 2014 and 2015 don't have access to certain methods, so they need different methods
-        if self.mayaVersion == "2015":
+        if int(self.mayaVersion) <= 2015:
             faceIter = om2.MItMeshPolygon(dagPath)
             while not faceIter.isDone():
                 faceIter.next()
            
-        if self.mayaVersion  == "2016":
+        else:
             vertIter = om2.MItMeshVertex(dagPath)
             while not vertIter.isDone():
                 
@@ -189,7 +188,7 @@ class BooleanCleaner(object):
                                 connectedVerts = vertIter.getConnectedVertices()
                                 
                                 #connectedEdges = self.checkOutlyingEdges(dagPath, connectedVerts, connectedEdges)
-                                print connectedEdges
+                                print(connectedEdges)
                                 connectedEdges = self.checkUVBorders(self.indexToString(dagPath, connectedEdges, "e"))
                                 return connectedEdges
                             
@@ -197,26 +196,26 @@ class BooleanCleaner(object):
     
 	
     def mergeBooleanVerts(self, dagPath, boolVertPositions):
-        print "Merging verts"
+        print("Merging verts")
         verts = om2.MFnMesh(fagPath).getPoints()
         
         mergeVerts = set(verts).difference(set(boolVertPositions))
         
         
-    def deleteBooleanEdges(self, mode="Maya Default", angleTolerance=0.001, mergeVerts=False, mergeDistance=0.01):
+    def deleteBooleanEdges(self, mode="Entire Mesh", angleTolerance=0.001, mergeVerts=False, mergeDistance=0.01):
         selection = om2.MGlobal.getActiveSelectionList()
-        
-        if self.mayaVersion == "2015":
-            print "This doesn't work yet in 2015"
+        toDelete = []
+
+        if int(self.mayaVersion) <= 2015:
+            print("This doesn't work yet in 2015")
             #This will help with older version of maya, or people who don't have service packs installed (curse them)
-            for i in xrange(selection.length()):
+            for i in range(selection.length()):
                 dagPath = selection.getDagPath(i)
-                print dagPath
+                print("Dag path", dagPath)
                 meshDag = om2.MFnDagNode(dagPath)
-                toDelete = []
+                
                 # Get edges and verts to work on
                 boolVerts = self.getBooleanVertices(dagPath, mode)
-                
                 # Iterate  over verts (unless there's an edge method)
                 for vert in boolVerts:
                     edges = self.getParallelEdges(dagPath, vert, angleTolerance)
@@ -224,17 +223,12 @@ class BooleanCleaner(object):
                         for edge in edges:
                             if edge not in toDelete:
                                 toDelete.append(edge)
-                print toDelete
-                if toDelete:
-                    pm.delete(toDelete)
                     
-        if self.mayaVersion == "2016":
+        else:
             selIter = om2.MItSelectionList(selection)
-            
             while not selIter.isDone():
                 dagPath = selIter.getDagPath()
                 meshDag = om2.MFnDagNode(dagPath)
-                toDelete = []
                 # Get edges and verts to work on
                 boolVerts = self.getBooleanVertices(dagPath, mode)
                 # Iterate  over verts (unless there's an edge method)
@@ -244,23 +238,18 @@ class BooleanCleaner(object):
                         for edge in edges:
                             if edge not in toDelete:
                                 toDelete.append(edge)
-                print toDelete
-                if toDelete:
-                    pm.delete(toDelete)
-            
-                '''
-                if collpaseShortEdges:
-                    print "Collapsing short edges... eventually"
-                    print "for now I'll just mergeVerts"
-                '''
                 
                 selIter.next()
         
-                
-class UI(BooleanCleaner):
+        print("To be deleted", toDelete)
+        if toDelete:
+            pm.polyDelEdge(toDelete, cv=True)         
+
+
+class UI(EdgeOptimizer):
 
     def __init__(self):
-        windowName = "BooleanCleaner"
+        windowName = "EdgeOptimizer"
     
         if pm.window(windowName, exists=True):
             pm.deleteUI(windowName)
@@ -269,14 +258,16 @@ class UI(BooleanCleaner):
         
         pm.menuBarLayout()
         pm.menu( label='Help' )
-        pm.menuItem( label='Polycount Thread' )
-        pm.menuItem( label='Creative Crash' )
-        pm.menuItem( label='My Website' )
+        pm.menuItem( label='There is no help!' )
+        #pm.menuItem( label='Polycount Thread' )
+        #pm.menuItem( label='Creative Crash' )
+        #pm.menuItem( label='My Website' )
         
         # Padding to make things look nicer
         pm.frameLayout(labelVisible=False, marginHeight=10, marginWidth=10)
         
-        pm.text(l="Instructitons")
+        pm.text(l="Instructions:\r\nThis tool I made in 2015 at work, then recreated at home from scratch. \r\nIt is meant to remove superfluous edges from a model which\
+                \r\ndo not add detail and can safely be optimized away without affecting the visual look.\r\n")
         
         pm.frameLayout(label="", marginHeight=5, marginWidth=5)
 
@@ -291,8 +282,8 @@ class UI(BooleanCleaner):
         
         pm.rowLayout(numberOfColumns=2)
         self.searchTypeDropdown = pm.optionMenuGrp(label='Search Type', columnAlign=[1,"left"], columnAttach=[2,"left", -80] )
-        pm.menuItem(label='Maya Default')
         pm.menuItem(label='Entire Mesh')
+        pm.menuItem(label='Boolean History')
         pm.menuItem(label='By Material')
         self.mergeVertsCheckbox = pm.checkBoxGrp(label="Merge verts afterward", columnAlign=[1,"left"], columnAttach=[2,"left", -10])
         pm.setParent('..')
@@ -319,4 +310,4 @@ class UI(BooleanCleaner):
         pass
         
 		
-booleanCleanerWindow = UI()
+edgeOptimizerWindow = UI()
