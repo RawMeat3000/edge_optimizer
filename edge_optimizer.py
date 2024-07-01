@@ -164,9 +164,6 @@ class EdgeOptimizer(object):
                             connectedEdges = self.removeFromArray(connectedEdges, edge1)
                             connectedEdges = self.removeFromArray(connectedEdges, edge2)
                             
-                            # 
-                            connectedVerts = vertIter.getConnectedVertices()
-                            
                             #connectedEdges = self.checkOutlyingEdges(dagPath, connectedVerts, connectedEdges)
                             print(connectedEdges)
                             connectedEdges = self.checkUVBorders(self.indexToString(dagPath, connectedEdges, "e"))
@@ -192,8 +189,6 @@ class EdgeOptimizer(object):
         selIter = om2.MItSelectionList(selection)
         while not selIter.isDone():
             dagPath = selIter.getDagPath()
-            print("Dag path", dagPath)
-            meshDag = om2.MFnDagNode(dagPath)
             # Get edges and verts to work on
             boolVerts = self.getBooleanVertices(dagPath, mode)
             # Iterate  over verts (unless there's an edge method)
@@ -217,9 +212,7 @@ class EdgeOptimizer(object):
         """
         for i in range(len(vectors)):
             for j in range(i + 1, len(vectors)):
-                n1 = vectors[i]
-                n2 = vectors[j]
-                if not n1.isParallel(n2, tolerance):
+                if not vectors[i].isParallel(vectors[j], tolerance):
                     return False
             
         return True
@@ -237,7 +230,6 @@ class EdgeOptimizer(object):
             return
         
         for mesh in selection:
-            print("Mesh:", mesh)
             badEdges = []
             
             # Iterate through edges
