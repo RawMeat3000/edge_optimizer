@@ -16,17 +16,21 @@ After
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/f616f859-031a-4d64-92c1-ca1b94dcdf82)
 
 
-Feature 2 - Fixing "hard" edges that inflate vertex counts during rendering. These usually happen when assets get exported/re-imported using wrong settings or via formats like OBJ which don't support smoothing very well.
+Feature 2 - Fixing "hard" edges that inflate vertex counts during rendering. These usually happen when assets get exported/re-imported using wrong settings or via formats like OBJ which don't support smoothing very well. This was a shockingly common issue in the production of Call of Duty: WWII. It happened most often in characters, likely due to artists moving the model data between apps like Maya and Zbrush often and losing information. 
 
 Before - When debugging tangent directions, you may notice that some of the blue vectors point multiple directions per vertex. This results in duplicated vertices and inflated asset costs. 
-Vert count: 1596
-Normal count: 5706
+
+Vertices: 1596
+
+Normals: 5706
 
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/b28648d4-8bd6-4eb9-a7d9-b4fc95e37d63)
 
 
 After - There should only be as many tangents as there are normals, roughly. The model is fixed. 
-Vert count: 1596
-Normal count: 1608
+
+Vertices: 1596
+
+Normals: 1608 (~3x reduction from before)
 
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/a0837c22-d107-45b5-a7e1-346353b8e0fa)
