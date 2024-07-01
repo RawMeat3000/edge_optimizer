@@ -18,7 +18,7 @@ After
 
 Feature 2 - Fixing "hard" edges that inflate vertex counts during rendering. These usually happen when assets get exported/re-imported using wrong settings or via formats like OBJ which don't support smoothing very well.
 
-Before - Displaying Tangent directions, you may notice that some of the blue vectors point multiple directions per vertex. This results in duplicated vertices and inflated asset costs. 
+Before - When debugging tangent directions, you may notice that some of the blue vectors point multiple directions per vertex. This results in duplicated vertices and inflated asset costs. 
 Vert count: 1596
 Normal count: 5706
 
