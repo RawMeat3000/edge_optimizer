@@ -21,6 +21,7 @@ Feature 2 - Fixing "hard" edges that inflate vertex counts during rendering. The
 Before - When debugging tangent directions, you may notice that some of the blue vectors point multiple directions per vertex. This results in duplicated vertices and inflated asset costs. 
 
 Vertices: 1596
+
 Normals: 5706
 
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/b28648d4-8bd6-4eb9-a7d9-b4fc95e37d63)
@@ -29,6 +30,7 @@ Normals: 5706
 After - There should only be as many tangents as there are normals, roughly. The model is fixed. 
 
 Vertices: 1596
+
 Normals: 1608 (~3.5x reduction from before)
 
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/a0837c22-d107-45b5-a7e1-346353b8e0fa)
