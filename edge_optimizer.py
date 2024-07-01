@@ -227,72 +227,45 @@ class EdgeOptimizer(object):
 
     def findBrokenTangents(self, tolerance=0.0):
         """
-        compares vertex normals and tangents for all edges of the selected mesh.
-        Returns a list of edges which aren't smoothed, but could be to reduce vertex counts
-        TODO: use more pythonic iterater: MItMeshVertex.iter()
+        Iterates the edges of the selected mesh and compares the face-vertex normals and tangent directions of the edge vertices.
+        Returns a list of edges which have differing tangent directions.
         """
-        selection = om2.MGlobal.getActiveSelectionList()       
-
-        for i in range(selection.length()):
+        selection = pm.ls(selection=True, dag=True, type='mesh', ni=True)
+        
+        if not selection:
+            pm.error("No mesh selected.")
+            return
+        
+        for mesh in selection:
+            print("Mesh:", mesh)
             badEdges = []
             
-            if selection.isEmpty():
-                om2.MGlobal.displayError("No mesh selected.")
-                return
-            
-            dagPath = selection.getDagPath(i)
-            print("dag path", dagPath)
-            meshFn = om2.MFnMesh(dagPath)
-            print("meshFn", meshFn)
-            
-            edgeIter = om2.MItMeshEdge(dagPath)
-            vertIter = om2.MItMeshVertex(dagPath)
-
-            faceVertexNormals = meshFn.getNormals()
-            faceVertexTangents = meshFn.getTangents()
-            
-            # Iterate through all edges
-            while not edgeIter.isDone():
-                # skip these types of edges
-                if edgeIter.onBoundary() or edgeIter.isSmooth:
-                    edgeIter.next()
+            # Iterate through edges
+            for edge in mesh.edges:
+                brokenTangentCounter = 0
+                # Skip boundary edges
+                if edge.isOnBoundary() or edge.isSmooth():
                     continue
 
-                edgeIndex = edgeIter.index()
-                vert1 = edgeIter.vertexId(0)
-                vert2 = edgeIter.vertexId(1)
-                
-                # Get face vertex normals
-                vertIter.setIndex(vert1)
-                vert1Normals = vertIter.getNormals()
-                vertIter.setIndex(vert2)
-                vert2Normals = vertIter.getNormals()
-                
-                # Check if all normals are roughly parallel, 
-                # if not then skip this edge because we assume it's hard on purpose
-                if not self.isParallel(vert1Normals) and not self.isParallel(vert2Normals):
-                    print("skipping", edgeIndex)
-                    edgeIter.next()
-                    continue
-                
-                '''
-                # Get face vertex tangents
-                vert1Tangents = meshFn.getTangents()
-                vert2Tangents = meshFn.getTangents()
-                
-                # Skip this edge if the tangents are parallel like they should be
-                if self.isParallel(vert1Tangents) and self.isParallel(vert2Tangents):
-                    edgeIter.next()
-                    continue
-                '''
-                # this was a bad edge
-                badEdges.append(edgeIndex)
-                
-                edgeIter.next()
+                edgeVerts = edge.connectedVertices()
+                for edgeVert in edgeVerts:
+                    testTangents = []
+                    connectedFaces = edgeVert.connectedFaces()
 
-            formattedEdges = ["{}.e[{}]".format(dagPath, edgeIndex) for edgeIndex in badEdges]
-            print(formattedEdges)
-            pm.select(formattedEdges, replace=True)
+                    for face in connectedFaces:
+                        t = mesh.getFaceVertexTangent(face.index(), edgeVert.index())
+                        testTangents.append(t)
+
+                    if not self.isParallel(testTangents):
+                        brokenTangentCounter += 1
+
+                if brokenTangentCounter == 2:
+                    badEdges.append(edge)
+
+            if badEdges:
+                pm.select(badEdges, replace=True)
+                if pm.checkBoxGrp(self.smoothEdgesAfter, query=True, value1=True):
+                    pm.polySoftEdge(angle=180)
 
 
     def getSelectedMesh(self):
