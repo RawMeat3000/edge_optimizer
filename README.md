@@ -5,7 +5,8 @@ The tool supports ignoring edges if they are UV borders. Support for other thing
 
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/2d19e334-c832-4f13-8d18-5c51e704a668)
 
-1. Unnecessary edge deletion. 
+Feature 1 - Unnecessary edge deletion.
+   
 Model before:
 
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/4026a5bc-16b5-43d3-b2bd-cda8fe29d594)
@@ -15,7 +16,7 @@ After
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/f616f859-031a-4d64-92c1-ca1b94dcdf82)
 
 
-2. Fixing "hard" edges that inflate vertex counts during rendering. These usually happen when assets get exported/re-imported using wrong settings or via formats like OBJ which don't support smoothing very well.
+Feature 2 - Fixing "hard" edges that inflate vertex counts during rendering. These usually happen when assets get exported/re-imported using wrong settings or via formats like OBJ which don't support smoothing very well.
 
 Before
 Vert count: 1596
