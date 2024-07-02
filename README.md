@@ -14,7 +14,7 @@ After
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/f616f859-031a-4d64-92c1-ca1b94dcdf82)
 
 
-Feature 2 - This function smooths "hard" edges which inflate vertex counts through duplication of vertices via broken tangents/binormals. These usually happen when assets get exported/re-imported using wrong settings or via formats like OBJ which don't support smoothing very well. This was a shockingly common issue in situations where content moves frequently between programs and gets converted to different file types. It happened most often in characters, likely due to artists moving the model data between apps like Maya and Zbrush often and losing information. 
+Feature 2 - This function smooths "hard" edges which inflate vertex counts through duplication of vertices via broken tangents/binormals. This usually occurs when assets are exported/re-imported using wrong settings or via formats like OBJ which don't support smoothing very well. This is a surprisingly common issue in situations where content moves frequently between programs and gets converted to different file types, such as between Maya and ZBrush.
 
 Before - When debugging tangent directions, you may notice that some of the blue vectors point multiple directions per vertex. This results in duplicated vertices and inflated asset costs. 
 
