@@ -1,11 +1,9 @@
 This tool is meant for optimizing meshes in some commonly needed ways, with a focus on edges.  
 
-The tool supports adjusting the tolerance of edges to be deleted. It defaults to deleting only edges which add miniscule amounts of curvature, but can be dialed up to get more aggressive if needed.
-The tool supports ignoring edges if they are UV borders. Support for other things like verted colors is TODO.
 
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/2d19e334-c832-4f13-8d18-5c51e704a668)
 
-Feature 1 - Unnecessary edge deletion.
+Feature 1 - Unnecessary edge deletion. The tool can delete edges which do not add noticeable complexity to a model, such as leftover edge loops from construction or boolean operations. The detection algorith can be dialed up to delete edges more aggressively if additional optimization is needed. The tool supports ignoring edges if they are things like UV borders to avoid visual artifacts. 
    
 Model before:
 
@@ -16,7 +14,7 @@ After
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/f616f859-031a-4d64-92c1-ca1b94dcdf82)
 
 
-Feature 2 - Fixing "hard" edges that inflate vertex counts during rendering. These usually happen when assets get exported/re-imported using wrong settings or via formats like OBJ which don't support smoothing very well. This was a shockingly common issue in the production of Call of Duty: WWII. It happened most often in characters, likely due to artists moving the model data between apps like Maya and Zbrush often and losing information. 
+Feature 2 - This function smooths "hard" edges which inflate vertex counts through duplication of vertices via broken tangents/binormals. These usually happen when assets get exported/re-imported using wrong settings or via formats like OBJ which don't support smoothing very well. This was a shockingly common issue in situations where content moves frequently between programs and gets converted to different file types. It happened most often in characters, likely due to artists moving the model data between apps like Maya and Zbrush often and losing information. 
 
 Before - When debugging tangent directions, you may notice that some of the blue vectors point multiple directions per vertex. This results in duplicated vertices and inflated asset costs. 
 
