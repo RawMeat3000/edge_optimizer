@@ -1,4 +1,4 @@
-This tool is for optimizng models where lots of edge loops were inserted or booleans were used, which often results in adding edges and verts that don't help describe surface details.
+This tool is meant for optimizing meshes in some commonly needed ways, with a focus on edges.  
 
 The tool supports adjusting the tolerance of edges to be deleted. It defaults to deleting only edges which add miniscule amounts of curvature, but can be dialed up to get more aggressive if needed.
 The tool supports ignoring edges if they are UV borders. Support for other things like verted colors is TODO.
