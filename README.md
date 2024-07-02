@@ -3,7 +3,7 @@ This tool is meant for optimizing meshes in some commonly needed ways, with a fo
 
 ![image](https://github.com/RawMeat3000/edge_optimizer/assets/5659157/2d19e334-c832-4f13-8d18-5c51e704a668)
 
-Feature 1 - Unnecessary edge deletion. The tool can delete edges which do not add noticeable complexity to a model, such as leftover edge loops from construction or boolean operations. The detection algorith can be dialed up to delete edges more aggressively if additional optimization is needed. The tool supports ignoring edges if they are things like UV borders to avoid visual artifacts. 
+Feature 1 - Unnecessary edge deletion. The tool can delete edges which do not add noticeable complexity to a model, such as leftover edge loops from construction or boolean operations. The detection algorithm can be dialed up to delete edges more aggressively if additional optimization is needed. The tool supports ignoring edges along UV borders to avoid visual artifacts. 
    
 Model before:
 
